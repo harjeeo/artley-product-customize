@@ -23,7 +23,10 @@ export const MOCKUP_DEFINITIONS: MockupDefinition[] = [
     id: "mug",
     name: "Mug",
     color: "#e5e7eb",
-    printArea: { x: 75, y: 100, width: 130, height: 90, rx: 6 },
+    imageSrc: "/Mug_Mockup_2-3.jpg",
+    viewBoxWidth: 1200,
+    viewBoxHeight: 1600,
+    printArea: { x: 190, y: 430, width: 560, height: 560, rx: 20, rotation: -6 },
   },
   {
     id: "cushion",

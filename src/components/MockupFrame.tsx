@@ -2,8 +2,6 @@
 
 import { MockupState } from "@/types/mockup";
 
-const VIEW_SIZE = 300;
-
 function Silhouette({ id, color }: { id: string; color: string }) {
   const stroke = "#9ca3af";
 
@@ -97,15 +95,19 @@ export default function MockupFrame({
   artworkUrl: string | null;
 }) {
   const { printArea, placement } = mockup;
+  const viewBoxWidth = mockup.viewBoxWidth ?? 300;
+  const viewBoxHeight = mockup.viewBoxHeight ?? 300;
   const cx = printArea.x + printArea.width / 2;
   const cy = printArea.y + printArea.height / 2;
   const dx = (placement.x / 100) * printArea.width;
   const dy = (placement.y / 100) * printArea.height;
   const clipId = `clip-${mockup.id}`;
+  const rotation = printArea.rotation ?? 0;
+  const printAreaTransform = rotation ? `rotate(${rotation} ${cx} ${cy})` : undefined;
 
   return (
     <svg
-      viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
+      viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
       className="w-full h-full"
       role="img"
       aria-label={`${mockup.name} mockup`}
@@ -118,25 +120,39 @@ export default function MockupFrame({
             width={printArea.width}
             height={printArea.height}
             rx={printArea.rx ?? 0}
+            transform={printAreaTransform}
           />
         </clipPath>
       </defs>
 
-      <Silhouette id={mockup.id} color={mockup.color} />
+      {mockup.imageSrc ? (
+        <image
+          href={mockup.imageSrc}
+          x={0}
+          y={0}
+          width={viewBoxWidth}
+          height={viewBoxHeight}
+          preserveAspectRatio="xMidYMid slice"
+        />
+      ) : (
+        <Silhouette id={mockup.id} color={mockup.color} />
+      )}
 
       {artworkUrl && (
         <g clipPath={`url(#${clipId})`}>
-          <g
-            transform={`translate(${cx} ${cy}) scale(${placement.scale}) translate(${-cx} ${-cy}) translate(${dx} ${dy})`}
-          >
-            <image
-              href={artworkUrl}
-              x={printArea.x}
-              y={printArea.y}
-              width={printArea.width}
-              height={printArea.height}
-              preserveAspectRatio="xMidYMid slice"
-            />
+          <g transform={printAreaTransform}>
+            <g
+              transform={`translate(${cx} ${cy}) scale(${placement.scale}) translate(${-cx} ${-cy}) translate(${dx} ${dy})`}
+            >
+              <image
+                href={artworkUrl}
+                x={printArea.x}
+                y={printArea.y}
+                width={printArea.width}
+                height={printArea.height}
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </g>
           </g>
         </g>
       )}
@@ -148,6 +164,7 @@ export default function MockupFrame({
           width={printArea.width}
           height={printArea.height}
           rx={printArea.rx ?? 0}
+          transform={printAreaTransform}
           fill="none"
           stroke="#c4c4c4"
           strokeDasharray="4 4"
